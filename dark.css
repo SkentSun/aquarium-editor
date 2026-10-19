@@ -65,3 +65,8 @@ button:has(>.ui-icon){display:inline-flex;align-items:center;justify-content:cen
 @media(max-width:760px){.fish-category-content{grid-template-columns:1fr}}
 .docked #selbar .transform-modes button:has(>.ui-icon){width:auto;min-width:82px;padding:8px 11px;gap:7px}
 .docked #selbar .transform-modes button.on{background:var(--accent2);border-color:var(--accent);color:var(--text)}
+
+.docked #pane.catalog-plant>.plant-strip{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:9px;scrollbar-width:thin;scrollbar-color:#4a6252 transparent}
+.docked #pane.catalog-plant>.plant-strip>.item{flex:0 0 140px;scroll-snap-align:start}
+.plant-category-tabs{touch-action:pan-x;scrollbar-width:thin}
+@media(max-width:760px){.docked #pane.catalog-plant>.plant-strip>.item{flex-basis:116px}}

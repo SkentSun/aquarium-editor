@@ -4,15 +4,15 @@ import { TANKS, SOILS, STONES, STONE_SIZES, WOODS, WOOD_SIZES, PLANTS, FISH, FIS
 import { BACKGROUNDS } from './tank.js';
 import { Plants, HI_COL } from './plants.js';
 import { Fishes } from './fish.js';
-import { Layout } from './layout.js?v=controls8';
+import { Layout } from './layout.js?v=natural11';
 import { makeStone } from './rocks.js';
 import { makeWood } from './wood.js';
-import { setTank, viewPreset, setQuality, QUALITY } from './main.js?v=controls8';
+import { setTank, viewPreset, setQuality, QUALITY } from './main.js?v=natural11';
 import { U } from './shaders.js';
-import { PRESETS, presetState } from './presets.js?v=names1';
+import { PRESETS, presetState } from './presets.js?v=natural11';
 import { Effects } from './fx.js';
-import { CenteredTransform } from './centered-transform.js?v=controls8';
-import { initStudioDock } from './mobile.js?v=controls8';
+import { CenteredTransform } from './centered-transform.js?v=natural11';
+import { initStudioDock } from './mobile.js?v=natural11';
 import { Inverts, INVERTS, makeInvertMesh } from './invert.js?v=names1';
 
 const $ = (s) => document.querySelector(s);
@@ -213,12 +213,30 @@ function renderTab() {
     P.querySelectorAll('.item').forEach((el) => el.onclick = () => setTool('place', { kind: 'wood', type: el.dataset.id }));
     P.querySelectorAll('#sizes button').forEach((b) => b.onclick = () => { ui.woodSize = b.dataset.z; renderTab(); if (ui.tool === 'place') newGhost(); });
   } else if (ui.tab === 'plant') {
-    const grp = (mode, title, note) => `<h3>${title}</h3><div class="grid">${PLANTS.filter((p) => p.mode === mode).map((p) => card(p.id, p.name, ui.thumbs['plant:' + p.id] || '', ui.toolArg?.type === p.id)).join('')}</div><p class="desc">${note}</p>`;
-    P.innerHTML = grp('carpet', '前景草', '在底床上涂抹，铺出草坪效果。') +
-      `<div class="seg"><button id="carpetErase" class="${ui.toolArg?.erase ? 'on' : ''}">橡皮擦</button></div>${brushRow()}` +
-      `<label class="row" style="cursor:pointer"><input type="checkbox" class="contChk" ${ui.continuous ? 'checked' : ''}> 连续放置 <span class="desc" style="margin:0">（也可按住 Shift 并点击连续放置）</span></label>` +
-      grp('clump', '中后景草', '在点击处种植一盆水草。选中后可通过“大小”调整草高。') +
-      grp('epiphyte', '附生水草', '点击石材或沉木表面，将水草附着在该处。');
+    const categories = [['carpet','前景草'],['clump','中后景草'],['epiphyte','附生水草']];
+    ui.plantCategory ||= 'carpet';
+    P.innerHTML = `<div class="plant-category-tabs fish-category-tabs" role="tablist" aria-label="水草分类">${categories.map(([mode,title]) => `<button role="tab" id="plant-tab-${mode}" aria-controls="plant-panel" aria-selected="${ui.plantCategory === mode}" tabindex="${ui.plantCategory === mode ? 0 : -1}" data-plant-category="${mode}" class="${ui.plantCategory === mode ? 'on' : ''}">${title}</button>`).join('')}</div>
+      <div class="grid plant-strip" id="plant-panel" role="tabpanel" aria-labelledby="plant-tab-${ui.plantCategory}">${PLANTS.filter(p => p.mode === ui.plantCategory).map(p => card(p.id,p.name,ui.thumbs['plant:'+p.id] || '',ui.toolArg?.type === p.id)).join('')}</div>` +
+      (ui.plantCategory === 'carpet' ? `<div class="seg"><button id="carpetErase" class="${ui.toolArg?.erase ? 'on' : ''}">橡皮擦</button></div>${brushRow()}` : `<label class="row" style="cursor:pointer"><input type="checkbox" class="contChk" ${ui.continuous ? 'checked' : ''}> 连续放置</label>`);
+    P.querySelectorAll('[data-plant-category]').forEach(button => {
+      const activate = mode => { ui.plantCategory = mode; renderTab(); P.querySelector(`[data-plant-category="${mode}"]`).focus(); };
+      button.onclick = () => activate(button.dataset.plantCategory);
+      button.onkeydown = e => {
+        const i = categories.findIndex(([mode]) => mode === button.dataset.plantCategory); let next;
+        if (e.key === 'ArrowRight') next = (i+1)%categories.length;
+        if (e.key === 'ArrowLeft') next = (i+categories.length-1)%categories.length;
+        if (e.key === 'Home') next = 0;
+        if (e.key === 'End') next = categories.length-1;
+        if (next !== undefined) { e.preventDefault(); activate(categories[next][0]); }
+      };
+    });
+    for (const strip of P.querySelectorAll('.plant-category-tabs,.plant-strip')) {
+      strip.addEventListener('wheel', e => {
+        if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || strip.scrollWidth <= strip.clientWidth) return;
+        const previous = strip.scrollLeft; strip.scrollLeft += e.deltaY;
+        if (strip.scrollLeft !== previous) e.preventDefault();
+      }, {passive:false});
+    }
     P.querySelectorAll('.item').forEach((el) => el.onclick = () => {
       const def = byId(PLANTS, el.dataset.id);
       if (def.mode === 'carpet') setTool('brush', { m: 'carpet', type: def.id });

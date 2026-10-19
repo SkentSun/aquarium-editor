@@ -4,15 +4,15 @@ import { TANKS, SOILS, STONES, STONE_SIZES, WOODS, WOOD_SIZES, PLANTS, FISH, FIS
 import { BACKGROUNDS } from './tank.js';
 import { Plants, HI_COL } from './plants.js';
 import { Fishes } from './fish.js';
-import { Layout } from './layout.js?v=appearance6';
+import { Layout } from './layout.js?v=controls8';
 import { makeStone } from './rocks.js';
 import { makeWood } from './wood.js';
-import { setTank, viewPreset, setQuality, QUALITY } from './main.js?v=appearance6';
+import { setTank, viewPreset, setQuality, QUALITY } from './main.js?v=controls8';
 import { U } from './shaders.js';
 import { PRESETS, presetState } from './presets.js?v=names1';
 import { Effects } from './fx.js';
-import { Gizmo } from './gizmo.js';
-import { initStudioDock } from './mobile.js?v=appearance6';
+import { CenteredTransform } from './centered-transform.js?v=controls8';
+import { initStudioDock } from './mobile.js?v=controls8';
 import { Inverts, INVERTS, makeInvertMesh } from './invert.js?v=names1';
 
 const $ = (s) => document.querySelector(s);
@@ -49,7 +49,7 @@ export async function initUI(_app, progress) {
   const fx = new Effects(app);
   app.fx = fx;
   app.onTank = [() => { plants.resetCarpets(); fx.build(app.tank); }];
-  ui.gizmo = new Gizmo(app.overlay);
+  ui.gizmo = new CenteredTransform(app, layout, pushHist);
   fx.build(app.tank);
   app.tank.onBg = (id) => fx.setBackground(id);
   layout.listeners.push(() => { fx.co2 = !!layout.settings.co2; });
@@ -369,7 +369,7 @@ function setTool(tool, arg = null) {
   clearGhost();
   setHover(null);
   const C = app.controls;
-  if (tool === 'select') { C.mouseButtons.LEFT = THREE.MOUSE.ROTATE; C.mouseButtons.RIGHT = THREE.MOUSE.ROTATE; C.touches.ONE = THREE.TOUCH.ROTATE; }
+  if (tool === 'select') { C.mouseButtons.LEFT = null; C.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE; C.mouseButtons.RIGHT = THREE.MOUSE.PAN; C.touches.ONE = THREE.TOUCH.ROTATE; }
   else { C.mouseButtons.LEFT = null; C.mouseButtons.RIGHT = THREE.MOUSE.ROTATE; C.touches.ONE = null; }   // one finger draws / places
   C.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
   if (tool === 'place') newGhost();
@@ -502,20 +502,15 @@ function select(uid) {
   const grp = (label, inner) => `<div class="sg"><span class="sl">${label}</span>${inner}</div>`;
   bar.innerHTML = `<div class="sh"><span class="nm">${esc(D.name)}</span><button data-a="close" class="x" title="取消选择"><img class="ui-icon" src="icons/close.svg" alt="" aria-hidden="true"></button></div>
     <div class="sr">
-      ${canRotate ? grp('旋转', '<button data-a="rotL" title="向左旋转"><img class="ui-icon" src="icons/rotate-left.svg" alt="" aria-hidden="true"></button><button data-a="rotR" title="向右旋转"><img class="ui-icon" src="icons/rotate-right.svg" alt="" aria-hidden="true"></button>') : ''}
-      ${grp('大小', `<input type="range" id="selSize" min="0.4" max="${D.max}" step="0.02" value="${it.scale || 1}"><span class="sv" id="selSizeV">${Math.round((it.scale || 1) * 100)}%</span>`)}
-      ${isObj ? grp('倾斜', '<button data-a="tiltL" title="向左倾斜"><img class="ui-icon" src="icons/tilt-left.svg" alt="" aria-hidden="true"></button><button data-a="tiltR" title="向右倾斜"><img class="ui-icon" src="icons/tilt-right.svg" alt="" aria-hidden="true"></button><button data-a="tiltF" title="向前倾斜"><img class="ui-icon" src="icons/tilt-front.svg" alt="" aria-hidden="true"></button><button data-a="tiltB" title="向后倾斜"><img class="ui-icon" src="icons/tilt-back.svg" alt="" aria-hidden="true"></button>') : ''}
-      ${isObj ? grp('高度', '<button data-a="down">下沉</button><button data-a="up">抬高</button>') : ''}
+      <div class="seg transform-modes">${[['translate','移动','move'],['rotate','旋转','rotate-right'],['scale','缩放','expand']].map(([mode,label,icon]) => `<button data-transform="${mode}" class="${ui.gizmo.mode === mode ? 'on' : ''}" title="${label}（${{translate:'W',rotate:'E',scale:'R'}[mode]}）"><img class="ui-icon" src="icons/${icon}.svg" alt="">${label}</button>`).join('')}</div>
     </div>
     <div class="sr">
       <button data-a="dup">复制</button><button data-a="new">更换形状</button><button data-a="del" class="del">删除</button>
     </div>`;
   bar.style.display = 'flex';
-  bar.querySelectorAll('button').forEach((b) => b.onclick = () => selAction(b.dataset.a));
+  bar.querySelectorAll('[data-a]').forEach((b) => b.onclick = () => selAction(b.dataset.a));
+  bar.querySelectorAll('[data-transform]').forEach(b => b.onclick = () => ui.gizmo.setMode(b.dataset.transform));
   ui.onSelect?.();
-  const sl = $('#selSize');
-  sl.oninput = () => { setSelScale(Number(sl.value), false); $('#selSizeV').textContent = `${Math.round(Number(sl.value) * 100)}%`; };
-  sl.onchange = () => setSelScale(Number(sl.value), true);
   hint();
   placeSelBar();
 }
@@ -569,7 +564,8 @@ function selAction(a) {
     case 'down': it.sink = (it.sink ?? it.size * (it.scale || 1) * (it.kind === 'stone' ? 0.1 : 0.03)) + 0.008; break;
     case 'up': it.sink = (it.sink ?? it.size * (it.scale || 1) * 0.1) - 0.008; break;
     case 'dup': {
-      const c = { ...it, uid: undefined };
+      const c = structuredClone(it); c.uid = undefined;
+      if (c.transform) { c.transform[12] += c.host ? .01 : .03; if (!c.host) c.transform[14] += .01; }
       if (c.host) { c.lp = [c.lp[0] + 0.01, c.lp[1], c.lp[2]]; } else { c.x += 0.03; c.z += 0.01; }
       if (c.kind !== 'stone' && c.kind !== 'wood') c.seed = Math.floor(Math.random() * 1e6);
       const n = layout.add(c);
@@ -749,6 +745,7 @@ function setupPointer() {
   // tapping the glass: the nearest point of the water the ray passes (up to the first thing it hits)
 
   el.addEventListener('pointerdown', (e) => {
+    if (ui.gizmo.busy || (ui.sel && ui.gizmo.controls.axis)) return;
     if (e.pointerType === 'touch') { touchDown(e); return; }
     if (e.button === 0 && gizmoStart(e)) { e.stopImmediatePropagation(); el.setPointerCapture(e.pointerId); return; }
     if (isView()) { if (e.button === 0) ui.downAt = { x: e.clientX, y: e.clientY }; return; }   // orbit / zoom only (a click taps the glass)
@@ -759,7 +756,7 @@ function setupPointer() {
       const uid = h && uidOf(h.object);
       if (uid) {
         select(uid);
-        startDrag(e, uid);
+        // Selection is separate from transformation; drag the center axes or use W/E/R.
         e.stopImmediatePropagation();
         el.setPointerCapture(e.pointerId);
       } else { ui.downAt = { x: e.clientX, y: e.clientY }; }
@@ -774,6 +771,7 @@ function setupPointer() {
     }
   }, { capture: true });
   el.addEventListener('pointermove', (e) => {
+    if (ui.gizmo.busy || ui.gizmo.controls.axis) return;
     if (e.pointerType === 'touch') { touchMove(e); return; }
     if (gdrag) { gizmoMove(e); return; }
     if (drag) { moveDrag(e); return; }
@@ -796,6 +794,7 @@ function setupPointer() {
     }
   });
   const up = (e) => {
+    if (ui.gizmo.controls.axis || ui.gizmo.busy) { ui.downAt = null; return; }
     if (e.pointerType === 'touch') { touchUp(e); return; }
     if (gdrag) { gizmoEnd(); return; }
     if (drag) endDrag();
@@ -812,7 +811,11 @@ function setupPointer() {
     e.preventDefault(); e.stopImmediatePropagation();
     const d = (e.deltaY || e.deltaX) > 0 ? -1 : 1;
     if (ui.tool === 'place') { ui.ghostRot = (ui.ghostRot || 0) + d * Math.PI / 12; ghostAt(e); }
-    else if (ui.sel) selAction(d > 0 ? 'rotL' : 'rotR');
+    else if (ui.sel) {
+      ui.gizmo.begin();
+      ui.gizmo.proxy.quaternion.setFromAxisAngle(new THREE.Vector3(0,1,0),d*Math.PI/12);
+      ui.gizmo.apply(); ui.gizmo.finish();
+    }
   }, { capture: true, passive: false });
 }
 /** a tap on the glass or in the water: fish near the spot the ray reaches dart away */
@@ -906,6 +909,7 @@ function brushAt(e, k) {
 // ---------------------------------------------------------------- keys
 function setupKeys() {
   addEventListener('keydown', (e) => {
+    if (!isView() && ui.gizmo.keyDown(e)) return;
     if (e.key === 'Escape') { e.preventDefault(); document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); ui.closePanels?.({focus:true}); if(isView()) setView(false); else if(ui.tool !== 'select') setTool('select'); else select(null); return; }
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
     if (isView()) {                      // only leave the mode or feed the fish

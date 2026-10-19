@@ -63,3 +63,5 @@ button:has(>.ui-icon){display:inline-flex;align-items:center;justify-content:cen
 .fishrow[hidden]{display:none!important}
 @media(max-width:1050px){.fish-category-content{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.fish-category-content{grid-template-columns:1fr}}
+.docked #selbar .transform-modes button:has(>.ui-icon){width:auto;min-width:82px;padding:8px 11px;gap:7px}
+.docked #selbar .transform-modes button.on{background:var(--accent2);border-color:var(--accent);color:var(--text)}

@@ -60,6 +60,13 @@ export class Layout {
     const o = this.items.get(uid);
     if (!o) return;
     const { item, mesh } = o, soil = this.app.soil;
+    if (item.transform) {
+      const parent = item.host ? this.items.get(item.host)?.mesh : this.app.scene;
+      if (parent && mesh.parent !== parent) parent.add(mesh);
+      new THREE.Matrix4().fromArray(item.transform).decompose(mesh.position, mesh.quaternion, mesh.scale);
+      mesh.updateMatrixWorld(true); return;
+    }
+
     if (item.host) {
       const h = this.items.get(item.host);
       if (!h) return;

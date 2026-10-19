@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>水景 · 水族箱造景</title><link rel="stylesheet" href="./studio.css"><link rel="stylesheet" href="./dock.css"><link rel="stylesheet" href="./dark.css?v=appearance6"><script type="importmap">
+  { "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  } }
+</script></head><body>
+<canvas id="c" aria-label="三维水族箱造景画布"></canvas>
+<header id="top" hidden>
+<h1>水景<small>AQUASCAPE STUDIO</small></h1>
+<div class="divider"></div><select id="tankSel" aria-label="鱼缸尺寸"></select>
+<div class="sp"></div>
+<button id="sceneBtn" aria-haspopup="dialog">概览 <span id="sceneStatus"></span></button>
+<div class="grp"><button id="undoBtn" title="撤销（Ctrl / ⌘ Z）" aria-label="撤销"><img class="ui-icon" src="icons/undo.svg" alt="" aria-hidden="true"></button><button id="redoBtn" title="重做（Ctrl / ⌘ Shift Z）" aria-label="重做"><img class="ui-icon" src="icons/redo.svg" alt="" aria-hidden="true"></button></div>
+<details id="projectMenu"><summary>鱼缸 <img class="ui-icon" src="icons/chevron-down.svg" alt="" aria-hidden="true"></summary><div class="project-actions"><button id="presetBtn">造景示例</button><button id="newBtn">新建造景</button></div></details>
+<button id="viewBtn" title="沉浸欣赏（V），按 Esc 退出">欣赏</button><span id="fps"></span>
+</header>
+<aside id="left" hidden><div id="leftHead"><span>造景素材</span><button id="leftToggle" title="收起素材面板" aria-label="收起素材面板"><img class="ui-icon" src="icons/minus.svg" alt="" aria-hidden="true"></button></div><nav id="tabs" aria-label="素材分类"><button data-tab="soil" class="on">底床</button><button data-tab="stone">石材</button><button data-tab="wood">沉木</button><button data-tab="plant">水草</button><button data-tab="fish">生物</button><button data-tab="env">环境</button><button data-tab="perf" hidden>性能</button></nav><div id="pane"></div></aside>
+<nav hidden id="views" aria-label="视角切换"><button data-view="front" class="on">正面</button><button data-view="angle">斜视</button><button data-view="top">俯视</button><button data-view="close">近景</button></nav>
+<div id="selbar"></div><div id="hint"></div><div id="toast" role="status"></div>
+<div class="modal" id="saveModal" role="dialog" aria-modal="true" aria-label="保存与导入"><div id="saveBody"></div></div>
+<div class="modal" id="presetModal" role="dialog" aria-modal="true" aria-label="造景示例"><div id="presetBody"></div></div>
+<div class="modal" id="sceneModal" role="dialog" aria-modal="true" aria-label="水族箱概览"><div id="sceneBody"></div></div>
+<div id="loading"><div>正在准备水景…</div><div class="bar"><i id="loadbar"></i></div></div>
+<script type="module" src="./main.js?v=appearance6"></script></body></html>

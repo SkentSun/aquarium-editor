@@ -177,7 +177,9 @@ export async function loadFish(url, opts = {}) {
   const key = url + (opts.key || '');
   if (cache.has(key)) return cache.get(key);
   const p = (async () => {
-    const s = atob((await (await fetch(url + '.b64.txt')).text()).trim());
+    const response = await fetch(url + '.b64.txt');
+    if (!response.ok) throw new Error(`Fish model load failed: ${response.status}`);
+    const s = atob((await response.text()).trim());
     const buf = new Uint8Array(s.length);
     for (let i = 0; i < s.length; i++) buf[i] = s.charCodeAt(i);
     const gltf = await loader.parseAsync(buf.buffer, url.replace(/[^/]*$/, ''));
@@ -193,7 +195,8 @@ export async function loadFish(url, opts = {}) {
     return { geometry: g, material, depthMaterial, swim, bytes: buf.byteLength, tex: `${map.image.width}×${map.image.height}`, tris };
   })();
   cache.set(key, p);
-  return p;
+  try { return await p; }
+  catch (error) { if (cache.get(key) === p) cache.delete(key); throw error; }
 }
 
 /** Per-instance swim + fin state attributes for n instances: geometry.setAttribute('aSwim'/'aFin', ...). */

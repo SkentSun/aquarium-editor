@@ -6,7 +6,7 @@
 //   otocinclus : graze while stuck to the front glass, stones or wood, then move to another spot
 // Food (エサ) flakes sink from the surface and every fish goes for the nearest one.
 import * as THREE from 'three';
-import { loadFish, swimAttributes, FishMotion, fishQuat } from './fishlib.js';
+import { loadFish, swimAttributes, FishMotion, fishQuat } from './fishlib.js?v=fishload13';
 import { patchUnder, U, rng } from './shaders.js';
 
 const MAXN = 80;
@@ -25,7 +25,8 @@ export class Fishes {
   }
 
   async ensure(def) {
-    if (this.schools.has(def.id)) return this.schools.get(def.id);
+    const existing = this.schools.get(def.id);
+    if (existing) { await existing.loading; return existing; }
     const s = { def, members: [], loading: null, im: null };
     this.schools.set(def.id, s);
     s.loading = (async () => {
@@ -41,13 +42,22 @@ export class Fishes {
       this.scene.add(im);
       s.im = im; s.swim = d.swim; s.L = d.swim.length;
     })();
-    await s.loading;
+    try { await s.loading; }
+    catch (error) {
+      if (this.schools.get(def.id) === s) this.schools.delete(def.id);
+      throw error;
+    }
     return s;
   }
 
   async setCount(def, n) {
+    // Only the latest count request may publish after the shared load finishes.
+    this.countRequests ??= new Map();
+    const request = {};
+    this.countRequests.set(def.id, request);
     const s = await this.ensure(def);
-    n = Math.min(n, MAXN);
+    if (this.countRequests.get(def.id) !== request) return;
+    n = Math.max(0, Math.min(Math.trunc(n), MAXN));
     while (s.members.length < n) s.members.push(this._spawn(s));
     s.members.length = n;
     s.im.count = n;

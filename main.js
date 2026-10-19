@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { U } from './shaders.js';
 import { setAniso } from './textures.js';
-import { Tank } from './tank.js?v=natural11';
+import { Tank } from './tank.js?v=navigation12';
 import { Soil } from './soil.js';
 import { createPost } from './post.js';
 import { createPerformanceMonitor } from './performance.js';
@@ -217,7 +217,7 @@ async function boot() {
   soil.setSoil(SOILS[0]);
   viewPreset('front', true);
   bar.style.width = '30%';
-  const mods = await Promise.allSettled([import('./ui.js?v=natural11')]);
+  const mods = await Promise.allSettled([import('./ui.js?v=navigation12')]);
   for (const m of mods) if (m.status === 'rejected') console.error(m.reason);
   if (mods[0].status === 'fulfilled') await mods[0].value.initUI(app, (p) => (bar.style.width = `${30 + p * 70}%`));
   bar.style.width = '100%';

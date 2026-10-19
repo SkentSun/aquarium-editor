@@ -18,6 +18,10 @@ export function initStudioDock(app, ui, h) {
   const close = $('#leftToggle'); close.innerHTML = '<img class="ui-icon" src="icons/close.svg" alt="" aria-hidden="true">'; close.title = '关闭面板'; close.setAttribute('aria-label', '关闭面板');
   const dock = document.createElement('nav'); dock.id = 'studioDock'; dock.setAttribute('aria-label', '造景工具栏');
   dock.innerHTML = `<div class="dock-tools">${[['material','造景'],['fish','生物'],['env','环境'],['perf','性能'],['views','视角']].map(([id,label])=>`<button data-panel="${id}" aria-expanded="false" aria-controls="${id==='views'?'viewPopover':'left'}">${icon(id)}<span>${label}</span></button>`).join('')}<i class="dock-divider"></i><span id="dockHistory"></span><i class="dock-divider"></i><button data-panel="project" aria-expanded="false" aria-controls="projectPopover">${icon('project')}<span>鱼缸</span></button><span id="dockView"></span></div>`;
+  const navigationHelp = document.createElement('p');
+  navigationHelp.className = 'navigation-help';
+  navigationHelp.textContent = app.mobile ? '单指拖动旋转视角 · 双指捏合缩放' : '按住鼠标中键拖动：旋转视角 · 滚动滚轮：缩放';
+  dock.append(navigationHelp);
   document.body.append(dock);
   $('#dockHistory').append($('#undoBtn'), $('#redoBtn'));
   $('#undoBtn').innerHTML = '<img class="ui-icon" src="icons/undo.svg" alt="" aria-hidden="true">'; $('#redoBtn').innerHTML = '<img class="ui-icon" src="icons/redo.svg" alt="" aria-hidden="true">';

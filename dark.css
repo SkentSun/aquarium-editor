@@ -70,3 +70,7 @@ button:has(>.ui-icon){display:inline-flex;align-items:center;justify-content:cen
 .docked #pane.catalog-plant>.plant-strip>.item{flex:0 0 140px;scroll-snap-align:start}
 .plant-category-tabs{touch-action:pan-x;scrollbar-width:thin}
 @media(max-width:760px){.docked #pane.catalog-plant>.plant-strip>.item{flex-basis:116px}}
+
+/* Essential navigation stays visible beside the tools. */
+.navigation-help{margin:3px 8px 4px;text-align:center;font-size:11px;line-height:1.6;color:#a9bcb0;pointer-events:none}
+@media(max-width:600px){.navigation-help{font-size:10px}}

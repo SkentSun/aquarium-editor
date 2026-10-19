@@ -4,15 +4,15 @@ import { TANKS, SOILS, STONES, STONE_SIZES, WOODS, WOOD_SIZES, PLANTS, FISH, FIS
 import { BACKGROUNDS } from './tank.js';
 import { Plants, HI_COL } from './plants.js';
 import { Fishes } from './fish.js';
-import { Layout } from './layout.js?v=natural11';
+import { Layout } from './layout.js?v=navigation12';
 import { makeStone } from './rocks.js';
 import { makeWood } from './wood.js';
-import { setTank, viewPreset, setQuality, QUALITY } from './main.js?v=natural11';
+import { setTank, viewPreset, setQuality, QUALITY } from './main.js?v=navigation12';
 import { U } from './shaders.js';
-import { PRESETS, presetState } from './presets.js?v=natural11';
+import { PRESETS, presetState } from './presets.js?v=navigation12';
 import { Effects } from './fx.js';
-import { CenteredTransform } from './centered-transform.js?v=natural11';
-import { initStudioDock } from './mobile.js?v=natural11';
+import { CenteredTransform } from './centered-transform.js?v=navigation12';
+import { initStudioDock } from './mobile.js?v=navigation12';
 import { Inverts, INVERTS, makeInvertMesh } from './invert.js?v=names1';
 
 const $ = (s) => document.querySelector(s);

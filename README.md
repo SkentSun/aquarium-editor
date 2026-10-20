@@ -37,3 +37,11 @@
 六套造景示例已按自然构图重做：石材成组并埋入地形，植物按高低和远近形成连续群落，底床增加局部坡度与弯曲留白。预览图来自相应布局的实际渲染。
 
 GitHub Pages：本项目为纯静态页面，可从 main 分支根目录发布；`.nojekyll` 保证模型、贴图与模块按原路径直接提供。
+
+## 打赏
+
+如果这个小工具对你有帮助，欢迎扫码请我喝杯咖啡。感谢支持，让创作继续。
+
+<img src="assets/support-qr.jpg" alt="打赏收款二维码" width="260">
+
+网页底部点击「打赏」即可查看同一二维码。此二维码沿用 [ASCII 艺术模拟器](https://github.com/SkentSun/ascii-simulation-art-console) 的打赏素材。

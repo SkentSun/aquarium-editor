@@ -74,3 +74,7 @@ button:has(>.ui-icon){display:inline-flex;align-items:center;justify-content:cen
 /* Essential navigation stays visible beside the tools. */
 .navigation-help{margin:3px 8px 4px;text-align:center;font-size:11px;line-height:1.6;color:#a9bcb0;pointer-events:none}
 @media(max-width:600px){.navigation-help{font-size:10px}}
+
+.navigation-help .support-button{display:inline-flex;align-items:center;justify-content:center;gap:4px;margin-left:12px;padding:2px 6px;background:transparent;border:0;color:#c4d9ca;font:inherit;cursor:pointer;pointer-events:auto}.support-button svg{width:15px;height:15px}.support-button:hover{color:#fff}.support-button:focus-visible{outline:2px solid #91b8a1;outline-offset:2px;border-radius:4px}
+#supportDialog{position:fixed;inset:0;margin:auto;width:min(360px,calc(100vw - 36px));max-height:calc(100dvh - 36px);overflow:auto;box-sizing:border-box;padding:28px;background:#151d1e;color:#d5e4db;border:1px solid #405349;border-radius:18px;box-shadow:0 20px 80px #0008;text-align:center}#supportDialog::backdrop{background:#0009}#supportDialog h2{font-size:19px;margin:9px 0 12px}#supportDialog p{font-size:12px;line-height:1.7;color:#a9bcb0;margin:12px 0}.support-qr{display:block;width:100%;height:auto;border-radius:10px}.support-close{position:absolute;right:10px;top:10px;display:grid;place-items:center;width:32px;height:32px;background:transparent;border:0;cursor:pointer}.support-close:focus-visible{outline:2px solid #91b8a1;border-radius:6px}
+@media(max-width:480px){.navigation-help .support-button{margin-left:5px;padding:2px}}

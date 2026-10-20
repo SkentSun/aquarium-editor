@@ -32,6 +32,7 @@ export function initStudioDock(app, ui, h) {
   supportDialog.setAttribute('aria-labelledby', 'supportTitle'); supportDialog.setAttribute('aria-describedby', 'supportDescription');
   supportDialog.innerHTML = '<button class="support-close" type="button" aria-label="关闭打赏窗口" autofocus><img class="ui-icon" src="icons/close.svg" alt=""></button><h2 id="supportTitle">请我喝杯咖啡</h2><p id="supportDescription">如果这个小工具对你有帮助，欢迎扫码打赏。</p><img class="support-qr" src="assets/support-qr.jpg" alt="打赏收款二维码" width="863" height="878"><p>感谢支持，让创作继续。</p>';
   document.body.append(supportDialog);
+  supportDialog.addEventListener('keydown', e => e.stopPropagation());
   supportButton.onclick = () => { closePanels(); supportDialog.showModal(); };
   supportDialog.querySelector('.support-close').onclick = () => supportDialog.close();
   supportDialog.addEventListener('click', e => { if (e.target === supportDialog) { const r = supportDialog.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) supportDialog.close(); } });
